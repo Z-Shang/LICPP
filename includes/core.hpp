@@ -1,0 +1,237 @@
+#pragma once
+#ifdef _MSC_VER
+#if _MSC_VER < 1900
+#error At least Visual Studio 2015 is required
+#endif
+#else
+#if __cplusplus <= 201103L
+#error At least C++ 14 is required
+#endif
+#endif // _MSC_VER
+
+#ifndef __LICPP_CORE_HPP__
+#define __LICPP_CORE_HPP__
+
+#include <cstdlib>
+#include <vector>
+#include <functional>
+#include <string>
+#include <sstream>
+
+using std::nullptr_t;
+
+namespace licpp {
+#define caar(X) car(car(X))
+#define cadr(X) car(cdr(X))
+#define cdar(X) cdr(car(X))
+#define caaar(X) car(car(car(X)))
+#define caadr(X) car(car(cdr(X)))
+#define cadar(X) car(cdr(car(X)))
+#define cdaar(X) cdr(car(car(X)))
+#define caddr(X) car(cdr(cdr(X)))
+#define cdadr(X) cdr(car(cdr(X)))
+#define cddar(X) cdr(cdr(car(X)))
+
+#define var auto
+
+	using nil = nullptr_t;
+
+	// A 2-Element Pair Structure That Holds Arbitary Types
+	template <typename T, typename U>
+	class Cons {
+	private:
+		T _car;
+		U _cdr;
+
+	public:
+		Cons(T car) :_car(car), _cdr(nullptr) {}
+		Cons(T car, U cdr) :_car(car), _cdr(cdr) {}
+
+		T car() const {
+			return _car;
+		}
+		U cdr() const {
+			return _cdr;
+		}
+		Cons<T, U> * set_car(T car) {
+			_car = car;
+			return this;
+		}
+		Cons<T, U> * set_cdr(U cdr) {
+			_cdr = cdr;
+			return this;
+		}
+	};
+
+	template<typename T, typename U>
+	inline auto cons(T car, U cdr) {
+		return new Cons<T, U>(car, cdr);
+	}
+
+	template <typename T>
+	inline auto list(T car) {
+		return cons(car, nullptr);
+	}
+	template <typename T, typename U>
+	inline auto list(T car, U cadr) {
+		return cons(car, cons(cadr, nullptr));
+	}
+	template<typename T, typename... Us>
+	inline auto list(T car, Us... rest) {
+		auto tmp = list(rest...);
+		return cons(car, tmp);
+	}
+
+	template<typename T, typename U>
+	inline T car(Cons<T, U> * c) {
+		return c->car();
+	}
+
+	template<typename T, typename U>
+	inline U cdr(Cons<T, U> * c) {
+		return c->cdr();
+	}
+
+	template <typename T>
+	struct _consp {
+		static const bool value = false;
+	};
+	template <typename T, typename U>
+	struct _consp<Cons<T, U> * > {
+		static const bool value = true;
+	};
+
+	template <typename T>
+	inline bool consp(T obj) {
+		return _consp<T>::value;
+	}
+
+	template <typename T>
+	inline std::ostream & operator<<(std::ostream& os, Cons<T, nullptr_t> * c) {
+		os << "(";
+		os << car(c);
+		os << ". nil)";
+		return os;
+	}
+	template <typename T, typename U>
+	inline std::ostream & operator<<(std::ostream& os, Cons<T, U> * c) {
+		os << "(";
+		os << car(c);
+		os << " . ";
+		os << cdr(c);
+		os << ")";
+		return os;
+	}
+
+	template <typename T, typename U>
+	inline std::string to_string(Cons<T, U> * c) {
+		std::stringstream ss;
+		ss << c;
+		return ss.str();
+	}
+
+	template <typename T>
+	inline bool equals(T a, T b) {
+		return a == b;
+	}
+	template <typename T, typename U>
+	inline bool equals(Cons<T, U> * lhs, Cons<T, U> * rhs) {
+		if (car(lhs) == car(rhs)) {
+			if (consp(cdr(lhs)) && consp(cdr(rhs))) {
+				return equals(cdr(lhs), cdr(lhs));
+			}
+			return cdr(lhs) == cdr(rhs);
+		}
+		return false;
+	}
+
+
+	// A List Type That Holds Dynamic Number Of Element Of One Type
+	template <typename T>
+	class List {
+	private:
+		T _head;
+		List<T> * _tail;
+
+	public:
+		T head() const { return _head; }
+		List<T> * tail() const { return _tail; }
+		List() :
+			_head(nullptr),
+			_tail(nullptr)
+		{}
+
+		List(T hd) :
+			_head(hd),
+			_tail(nullptr)
+		{}
+		List(T hd, T tl) :
+			_head(hd),
+			_tail(new List(tl))
+		{}
+		List(T hd, List<T> * lst) :
+			_head(hd),
+			_tail(lst)
+		{}
+
+		// A Trick To Use nullptr In The Places Require A Type Of List<T>*
+		static List<T> *
+			Nil() {
+			return nullptr;
+		}
+
+		// Determine Whether Two Lists are Identical, Order Matters
+		bool
+			equals(List<T> & b, std::function<bool(T, T)> pred = [](T a, T b) { return a == b; }) {
+			if (length(this) != length(b)) {
+				return false;
+			}
+			if (pred(_head, b->head())) {
+				if (_tail != nullptr) {
+					return _tail->equals(b->tail(), pred);
+				}
+				else {
+					return true;
+				}
+			}
+			return false;
+		}
+
+	};
+
+	// Some Handy Sugars
+	template <typename T>
+	inline T
+		car(List<T> * lst) {
+		return lst->head();
+	}
+
+	template <typename T>
+	inline List<T> *
+		cdr(List<T> * lst) {
+		return lst->tail();
+	}
+
+	template <typename T>
+	inline List<T> *
+		lcons(T ele, List<T> * lst) {
+		return new List<T>(ele, lst);
+	}
+
+
+	template <typename T>
+	inline List<T> *
+		tlist(T head) {
+		return new List<T>(head, nullptr);
+	}
+
+	template <typename T, typename ...Ts>
+	inline List<T> *
+		tlist(T head, Ts... rest) {
+		return lcons(head, list(rest...));
+	}
+};
+
+
+
+#endif
