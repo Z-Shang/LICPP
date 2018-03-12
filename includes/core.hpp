@@ -31,7 +31,23 @@ namespace licpp {
 #define caddr(X) car(cdr(cdr(X)))
 #define cdadr(X) cdr(car(cdr(X)))
 #define cddar(X) cdr(cdr(car(X)))
-
+#define caaaar(X) car(car(car(car(X))))
+#define caaadr(X) car(car(car(cdr(X))))
+#define caadar(X) car(car(cdr(car(X))))
+#define cadaar(X) car(cdr(car(car(X))))
+#define cdaaar(X) cdr(car(car(car(X))))
+#define caaddr(X) car(car(cdr(cdr(X))))
+#define cadadr(X) car(cdr(car(cdr(X))))
+#define cdaadr(X) cdr(car(car(cdr(X))))
+#define caddar(X) car(cdr(cdr(car(X))))
+#define cdadar(X) cdr(car(cdr(car(X))))
+#define cddaar(X) cdr(cdr(car(car(X))))
+#define cadddr(X) car(cdr(cdr(cdr(X))))
+#define cdaddr(X) cdr(car(cdr(cdr(X))))
+#define cddadr(X) cdr(cdr(car(cdr(X))))
+#define cdddar(X) cdr(cdr(cdr(car(X))))
+#define cddddr(X) cdr(cdr(cdr(cdr(X))))
+	
 #define var auto
 
 	using nil = nullptr_t;
