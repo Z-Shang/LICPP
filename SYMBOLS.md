@@ -63,6 +63,28 @@
 		- `cdddar`
 
 		- `cddddr`
+        
+- `consp: (type a) => a -> bool`
+
+- `listp: (type a) => a -> bool`
+
+- `nullp: (type a) => a -> bool`
+
+- `operator<<: std::ostream& -> nil_t -> std::ostream&`
+
+- `operator<<: std::ostream& -> Cons<T, U> -> std::ostream&`
+
+- `to_string: Cons<T, U> -> string`
+
+- `equals: (type a) => a -> a -> bool`
+
+- `equals: Cons<T, U> -> Cons<T, U> -> bool`
+
+- `append: Cons<T, U> -> Cons<S, Y> -> _append_t<Cons<T, U>, Cons<S, Y>>` (See the definition in `list_utils.hpp` for detail)
+
+- `reverse: Cons<T, U> -> _reverse_t<Cons<T, U>>` (See the definition in `list_utils.hpp` for detail)
+
+- `mapcar: (type a, type b) => (a -> b) -> Cons<T, U> -> _mapcar_t<Cons<T, U>, (a -> b)>` (See the definition in `list_utils.hpp` for detail)
 
 
 # Types Defined in LICPP
