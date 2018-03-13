@@ -10,33 +10,59 @@
 
 - `cdr: Cons<T, U> -> U`
 
--- Shortcuts:
---- `caar`
---- `cadr`
---- `cdar`
---- `caaar`
---- `caadr`
---- `cadar`
---- `cdaar`
---- `caddr`
---- `cdadr`
---- `cddar`
---- `caaaar`
---- `caaadr`
---- `caadar`
---- `cadaar`
---- `cdaaar`
---- `caaddr`
---- `cadadr`
---- `cdaadr`
---- `caddar`
---- `cdadar`
---- `cddaar`
---- `cadddr`
---- `cdaddr`
---- `cddadr`
---- `cdddar`
---- `cddddr`
+	- Shortcuts:
+
+		- `caar`
+
+		- `cadr`
+
+		- `cdar`
+
+		- `caaar`
+
+		- `caadr`
+
+		- `cadar`
+
+		- `cdaar`
+
+		- `caddr`
+
+		- `cdadr`
+
+		- `cddar`
+
+		- `caaaar`
+
+		- `caaadr`
+
+		- `caadar`
+
+		- `cadaar`
+
+		- `cdaaar`
+
+		- `caaddr`
+
+		- `cadadr`
+
+		- `cdaadr`
+
+		- `caddar`
+
+		- `cdadar`
+
+		- `cddaar`
+
+		- `cadddr`
+
+		- `cdaddr`
+
+		- `cddadr`
+
+		- `cdddar`
+
+		- `cddddr`
 
 
 # Types Defined in LICPP
