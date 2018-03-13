@@ -6,6 +6,8 @@
 
 - `list: T -> ...Us -> cons(T, list(Us...))`
 
+- `tlist: [T] -> List<T>`
+
 - `car: Cons<T, U> -> T`
 
 - `cdr: Cons<T, U> -> U`
