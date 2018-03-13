@@ -14,7 +14,7 @@
 Lisp Flavoured C++
 
 ## About
-A tiny library that implements some basic Lisp (mainly Common Lisp) utilities as a DSL, currently just a toy.
+A tiny library that implements some basic Lisp (mainly Common Lisp) utilities as a DSL, currently just a toy, beware of dirty hacks and low performance.
 
 ## Usage
 At least C++ 14 is required.
@@ -22,6 +22,10 @@ At least C++ 14 is required.
 You may expect everything to work similarly to what you know in Common Lisp (although there will be limitation because of the differences between C++ and Lisp).
 
 For the details of symbols defined in LICPP, check out [SYMBOLS.md](SYMBOLS.md).
+
+If you want some extra features, please use the latest version of GCC with the flags mentioned below:
+
+- Type Constraints `-fconcepts` Used in `multiple-value-bind` as an extra type checking.
 
 ## Note
 `tlist` stands for the type `List<T>` which does not have an equivalance in Common Lisp, you may think this is `(type t) => [t]` in Haskell.
