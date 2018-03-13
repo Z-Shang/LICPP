@@ -9,6 +9,8 @@ At least C++ 14 is required.
 
 You may expect everything to work similarly to what you know in Common Lisp (although there will be limitation because of the differences between C++ and Lisp).
 
+For the details of symbols defined in LICPP, check out [SYMBOLS.md](SYMBOLS.md).
+
 ## Note
 `tlist` stands for the type `List<T>` which does not have an equivalance in Common Lisp, you may think this is `(type t) => [t]` in Haskell.
 
