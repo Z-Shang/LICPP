@@ -1,3 +1,6 @@
+#ifndef __LICPP_HACKS__
+#define __LICPP_HACKS__
+
 #include "core.hpp"
 #include <type_traits>
 
@@ -44,3 +47,5 @@ namespace licpp{
     };
   }
 };
+
+#endif
