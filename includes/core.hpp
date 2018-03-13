@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 #ifdef _MSC_VER
 #if _MSC_VER < 1900
 #error At least Visual Studio 2015 is required
@@ -47,12 +47,14 @@ namespace licpp {
 #define cddadr(X) cdr(cdr(car(cdr(X))))
 #define cdddar(X) cdr(cdr(cdr(car(X))))
 #define cddddr(X) cdr(cdr(cdr(cdr(X))))
-	
 #define var auto
 
-	using nil = nullptr_t;
+	// using nil = nullptr_t;
 
 	// A 2-Element Pair Structure That Holds Arbitary Types
+  template <typename T, typename U> class Cons;
+  using nil_t = Cons<nullptr_t, nullptr_t> *;
+  static const nil_t nil = nullptr;
 	template <typename T, typename U>
 	class Cons {
 	private:
@@ -60,7 +62,7 @@ namespace licpp {
 		U _cdr;
 
 	public:
-		Cons(T car) :_car(car), _cdr(nullptr) {}
+		Cons(T car) :_car(car), _cdr(nil) {}
 		Cons(T car, U cdr) :_car(car), _cdr(cdr) {}
 
 		T car() const {
@@ -86,11 +88,11 @@ namespace licpp {
 
 	template <typename T>
 	inline auto list(T car) {
-		return cons(car, nullptr);
+		return cons(car, nil);
 	}
 	template <typename T, typename U>
 	inline auto list(T car, U cadr) {
-		return cons(car, cons(cadr, nullptr));
+		return cons(car, cons(cadr, nil));
 	}
 	template<typename T, typename... Us>
 	inline auto list(T car, Us... rest) {
@@ -116,14 +118,49 @@ namespace licpp {
 	struct _consp<Cons<T, U> * > {
 		static const bool value = true;
 	};
-
 	template <typename T>
-	inline bool consp(T obj) {
+	inline bool consp(T) {
 		return _consp<T>::value;
 	}
 
+  template <typename T>
+  struct _listp{
+    static const bool value = false;
+  };
+  template <>
+  struct _listp<nil_t>{
+    static const bool value = true;
+  };
+  template <typename T, typename U>
+  struct _listp<Cons<T, U> *>{
+    static const bool value = _listp<U>::value;
+  };
+  template <typename T>
+  inline bool listp(T){
+    return _listp<T>::value;
+  }
+
+  template <typename T>
+  struct _nullp{
+    static const bool value = false;
+  };
+  template <>
+  struct _nullp<nil_t>{
+    static const bool value = true;
+  };
+  template <typename T>
+  inline bool nullp(T){
+    return _nullp<T>::value;
+  }
+
+
 	template <typename T>
-	inline std::ostream & operator<<(std::ostream& os, Cons<T, nullptr_t> * c) {
+	inline std::ostream & operator<<(std::ostream& os, nil_t) {
+		os << "nil";
+		return os;
+	}
+	template <typename T>
+	inline std::ostream & operator<<(std::ostream& os, Cons<T, nil_t> * c) {
 		os << "(";
 		os << car(c);
 		os << ". nil)";
@@ -131,11 +168,17 @@ namespace licpp {
 	}
 	template <typename T, typename U>
 	inline std::ostream & operator<<(std::ostream& os, Cons<T, U> * c) {
+    if(nullp(c)){
+      os << "nil";
+      return os;
+    }
 		os << "(";
 		os << car(c);
-		os << " . ";
-		os << cdr(c);
-		os << ")";
+    if(cdr(c)){
+      os << " . ";
+      os << cdr(c);
+    }
+    os << ")";
 		return os;
 	}
 
