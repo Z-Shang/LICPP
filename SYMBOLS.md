@@ -93,7 +93,7 @@
 
 `List<T>`
 
-`nil_t`
+`nil_t := Cons<nullptr_t, nullptr_t>`
 
 `_consp<T>::value : bool`
 
