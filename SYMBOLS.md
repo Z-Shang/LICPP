@@ -88,7 +88,6 @@
 
 - `mapcar: (type a, type b) => (a -> b) -> Cons<T, U> -> _mapcar_t<Cons<T, U>, (a -> b)>` (See the definition in `list_utils.hpp` for detail)
 
-
 # Types Defined in LICPP
 
 `Cons<T, U>`
@@ -96,6 +95,8 @@
 `List<T>`
 
 `nil_t := Cons<nullptr_t, nullptr_t>`
+
+`_list_t<...T>` A short hand for `Cons<T, Cons< ... >>`
 
 `_consp<T>::value : bool`
 

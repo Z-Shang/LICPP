@@ -123,6 +123,23 @@ namespace licpp {
 		return _consp<T>::value;
 	}
 
+  template <typename ... T>
+  struct _list_t{
+    using type = nullptr_t;
+  };
+  template <>
+  struct _list_t<nullptr_t>{
+    using type = nil_t;
+  };
+  template <typename T>
+  struct _list_t<T>{
+    using type = Cons<T, nil_t> * ;
+  };
+  template <typename T, typename ... U>
+  struct _list_t<T, U... >{
+    using type = Cons<T, typename _list_t<U ... >::type> * ;
+  };
+
   template <typename T>
   struct _listp{
     static const bool value = false;
