@@ -15,6 +15,8 @@ A Lisp Flavoured C++
 ## About
 A tiny library that implements some basic Lisp (mainly Common Lisp) utilities as a DSL, currently just a toy, beware of dirty hacks and low performance.
 
+This has been tested with Clang 9.0, GCC 7.1, and Visual Studio Community 2017.
+
 ## Usage
 At least C++ 14 is required.
 
