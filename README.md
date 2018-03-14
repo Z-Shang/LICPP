@@ -24,7 +24,7 @@ For the details of symbols defined in LICPP, check out [SYMBOLS.md](SYMBOLS.md).
 
 If you want some extra features, please use the latest version of GCC with the flags mentioned below:
 
-- Type Constraints `-fconcepts` Used in `multiple-value-bind` as an extra type checking.
+- Type Constraints, enable with flag `-fconcepts` (GCC only)
 
 ## Note
 `tlist` stands for the type `List<T>` which does not have an equivalance in Common Lisp, you may think this is `(type t) => [t]` in Haskell.
