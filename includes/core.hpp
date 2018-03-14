@@ -9,6 +9,16 @@
 #endif
 #endif // _MSC_VER
 
+#ifdef __GNUG__
+#ifndef __clang__
+#define __USING_GCC__
+#if __cpp_concepts > 201507
+#define __HAS_CONCEPTS__
+#endif
+#endif
+#endif
+
+
 #ifndef __LICPP_CORE_HPP__
 #define __LICPP_CORE_HPP__
 
@@ -141,6 +151,28 @@ namespace licpp {
   };
 
   template <typename T>
+  struct _car_t{};
+  template <>
+  struct _car_t<nil_t>{
+    using type = nil_t;
+  };
+  template <typename T, typename U>
+  struct _car_t<Cons<T, U> * >{
+    using type = T;
+  };
+  template <typename T>
+  struct _cdr_t{};
+  template <>
+  struct _cdr_t<nil_t>{
+    using type = nil_t;
+  };
+  template <typename T, typename U>
+  struct _cdr_t<Cons<T, U> * >{
+    using type = U;
+  };
+
+
+  template <typename T>
   struct _listp{
     static const bool value = false;
   };
@@ -158,6 +190,36 @@ namespace licpp {
   }
 
   template <typename T>
+  struct _list_len{
+    static const int value = 0;
+  };
+  template <>
+  struct _list_len<nil_t>{
+    static const int value = 0;
+  };
+  template <typename T>
+  struct _list_len<Cons<T, nil_t> * >{
+    static const int value = 1;
+  };
+  template <typename T, typename U>
+  struct _list_len<Cons<T, U> * >{
+    static const int value = 1 + _list_len<U>::value;
+  };
+  template <typename T, typename U>
+  // This requires Concepts TS (Available in GCC >= 6.1 with flag `-fconcepts`)
+#ifdef __HAS_CONCEPTS__
+  requires _listp<Cons<T, U> *>::value
+#endif
+  inline int length(Cons<T, U> * l){
+    #ifndef __HAS_CONCEPTS__
+    if(!(listp(l))){
+      throw "LENGTH only works on proper list.";
+    }
+    #endif
+    return _list_len<Cons<T, U> * >::value;
+  }
+
+  template <typename T>
   struct _nullp{
     static const bool value = false;
   };
@@ -171,143 +233,141 @@ namespace licpp {
   }
 
 
-	template <typename T>
-	inline std::ostream & operator<<(std::ostream& os, nil_t) {
-		os << "nil";
-		return os;
-	}
-	template <typename T>
-	inline std::ostream & operator<<(std::ostream& os, Cons<T, nil_t> * c) {
-		os << "(";
-		os << car(c);
-		os << ". nil)";
-		return os;
-	}
-	template <typename T, typename U>
-	inline std::ostream & operator<<(std::ostream& os, Cons<T, U> * c) {
+  template <typename T>
+  inline std::ostream & operator<<(std::ostream& os, nil_t) {
+    os << "nil";
+    return os;
+  }
+  template <typename T>
+  inline std::ostream & operator<<(std::ostream& os, Cons<T, nil_t> * c) {
+    os << "(";
+    os << car(c);
+    os << ". nil)";
+    return os;
+  }
+  template <typename T, typename U>
+  inline std::ostream & operator<<(std::ostream& os, Cons<T, U> * c) {
     if(nullp(c)){
       os << "nil";
       return os;
     }
-		os << "(";
-		os << car(c);
+    os << "(";
+    os << car(c);
     if(cdr(c)){
       os << " . ";
       os << cdr(c);
     }
     os << ")";
-		return os;
-	}
+    return os;
+  }
 
-	template <typename T, typename U>
-	inline std::string to_string(Cons<T, U> * c) {
-		std::stringstream ss;
-		ss << c;
-		return ss.str();
-	}
+  template <typename T, typename U>
+  inline std::string to_string(Cons<T, U> * c) {
+    std::stringstream ss;
+    ss << c;
+    return ss.str();
+  }
 
-	template <typename T>
-	inline bool equals(T a, T b) {
-		return a == b;
-	}
-	template <typename T, typename U>
-	inline bool equals(Cons<T, U> * lhs, Cons<T, U> * rhs) {
-		if (car(lhs) == car(rhs)) {
-			if (consp(cdr(lhs)) && consp(cdr(rhs))) {
-				return equals(cdr(lhs), cdr(lhs));
-			}
-			return cdr(lhs) == cdr(rhs);
-		}
-		return false;
-	}
-
-
-	// A List Type That Holds Dynamic Number Of Element Of One Type
-	template <typename T>
-	class List {
-	private:
-		T _head;
-		List<T> * _tail;
-
-	public:
-		T head() const { return _head; }
-		List<T> * tail() const { return _tail; }
-		List() :
-			_head(nullptr),
-			_tail(nullptr)
-		{}
-
-		List(T hd) :
-			_head(hd),
-			_tail(nullptr)
-		{}
-		List(T hd, T tl) :
-			_head(hd),
-			_tail(new List(tl))
-		{}
-		List(T hd, List<T> * lst) :
-			_head(hd),
-			_tail(lst)
-		{}
-
-		// A Trick To Use nullptr In The Places Require A Type Of List<T>*
-		static List<T> *
-			Nil() {
-			return nullptr;
-		}
-
-		// Determine Whether Two Lists are Identical, Order Matters
-		bool
-			equals(List<T> & b, std::function<bool(T, T)> pred = [](T a, T b) { return a == b; }) {
-			if (length(this) != length(b)) {
-				return false;
-			}
-			if (pred(_head, b->head())) {
-				if (_tail != nullptr) {
-					return _tail->equals(b->tail(), pred);
-				}
-				else {
-					return true;
-				}
-			}
-			return false;
-		}
-
-	};
-
-	// Some Handy Sugars
-	template <typename T>
-	inline T
-		car(List<T> * lst) {
-		return lst->head();
-	}
-
-	template <typename T>
-	inline List<T> *
-		cdr(List<T> * lst) {
-		return lst->tail();
-	}
-
-	template <typename T>
-	inline List<T> *
-		lcons(T ele, List<T> * lst) {
-		return new List<T>(ele, lst);
-	}
+  template <typename T>
+  inline bool equals(T a, T b) {
+    return a == b;
+  }
+  template <typename T, typename U>
+  inline bool equals(Cons<T, U> * lhs, Cons<T, U> * rhs) {
+    if (car(lhs) == car(rhs)) {
+      if (consp(cdr(lhs)) && consp(cdr(rhs))) {
+        return equals(cdr(lhs), cdr(lhs));
+      }
+      return cdr(lhs) == cdr(rhs);
+    }
+    return false;
+  }
 
 
-	template <typename T>
-	inline List<T> *
-		tlist(T head) {
-		return new List<T>(head, nullptr);
-	}
+  // A List Type That Holds Dynamic Number Of Element Of One Type
+  template <typename T>
+  class List {
+  private:
+    T _head;
+    List<T> * _tail;
 
-	template <typename T, typename ...Ts>
-	inline List<T> *
-		tlist(T head, Ts... rest) {
-		return lcons(head, list(rest...));
-	}
+  public:
+    T head() const { return _head; }
+    List<T> * tail() const { return _tail; }
+    List() :
+      _head(nullptr),
+      _tail(nullptr)
+    {}
+
+    List(T hd) :
+      _head(hd),
+      _tail(nullptr)
+    {}
+    List(T hd, T tl) :
+      _head(hd),
+      _tail(new List(tl))
+    {}
+    List(T hd, List<T> * lst) :
+      _head(hd),
+      _tail(lst)
+    {}
+
+    // A Trick To Use nullptr In The Places Require A Type Of List<T>*
+    static List<T> *
+    Nil() {
+      return nullptr;
+    }
+
+    // Determine Whether Two Lists are Identical, Order Matters
+    bool
+    equals(List<T> & b, std::function<bool(T, T)> pred = [](T a, T b) { return a == b; }) {
+      if (length(this) != length(b)) {
+        return false;
+      }
+      if (pred(_head, b->head())) {
+        if (_tail != nullptr) {
+          return _tail->equals(b->tail(), pred);
+        }
+        else {
+          return true;
+        }
+      }
+      return false;
+    }
+
+  };
+
+  // Some Handy Sugars
+  template <typename T>
+  inline T
+  car(List<T> * lst) {
+    return lst->head();
+  }
+
+  template <typename T>
+  inline List<T> *
+  cdr(List<T> * lst) {
+    return lst->tail();
+  }
+
+  template <typename T>
+  inline List<T> *
+  lcons(T ele, List<T> * lst) {
+    return new List<T>(ele, lst);
+  }
+
+
+  template <typename T>
+  inline List<T> *
+  tlist(T head) {
+    return new List<T>(head, nullptr);
+  }
+
+  template <typename T, typename ...Ts>
+  inline List<T> *
+  tlist(T head, Ts... rest) {
+    return lcons(head, list(rest...));
+  }
 };
-
-
 
 #endif
