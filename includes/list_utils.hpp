@@ -86,35 +86,63 @@ namespace licpp{
     throw "APPEND only works on proper lists.";
   }
 
-  template <typename T, typename U>
-  struct _mapcar_t {
-    using type = nullptr_t;
-  };
+  template <typename T, typename U, typename ...Us>
+  struct _mapcar_t {};
   template <typename F>
-  struct _mapcar_t<nil_t, F>{
+  struct _mapcar_t<F, nil_t>{
     using type = nil_t;
   };
-  template <typename T, typename F>
-  struct _mapcar_t<Cons<T, nil_t> *, F>{
+  template <typename F, typename T>
+  struct _mapcar_t<F, Cons<T, nil_t> *>{
     using type = Cons<typename std::result_of<F&(T)>::type, nil_t> *;
   };
-  template <typename T, typename U, typename F>
-  struct _mapcar_t<Cons<T, U> *, F>{
-    using type = Cons<typename std::result_of<F&(T)>::type, typename _mapcar_t<U, F>::type> * ;
+  template <typename F, typename T, typename U>
+  struct _mapcar_t<F, Cons<T, U> *>{
+    using type = Cons<typename std::result_of<F&(T)>::type, typename _mapcar_t<F, U>::type> * ;
   };
-  template <typename F>
-  nil_t _mapcar(F, nil_t){
-    return nil;
+  template <typename F, typename ...S>
+  struct _packed_result_t{
+    using type = typename std::result_of<F&(S...)>::type;
+  };
+  template <typename F, typename T, typename ...S>
+  struct _mapcar_t<F, Cons<T, nil_t> *, S...>{
+    using type = Cons<typename _packed_result_t<F, T, typename _car_t<S>::type ...>::type,
+                      nil_t> * ;
+  };
+  template <typename F, typename T, typename U, typename ...S>
+  struct _mapcar_t<F, Cons<T, U> *, S...>{
+    using type = Cons<typename _packed_result_t<F, T, typename _car_t<S>::type ...>::type,
+                      typename _mapcar_t<F, U, typename _cdr_t<S>::type ...>::type> *;
+  };
+
+  template <typename F, typename T>
+  auto _mapcar(F fn, Cons<T, nil_t> * lst){
+    return list(fn(car(lst)));
   }
-  template <typename T, typename U, typename F,
+  template <typename F, typename T, typename U,
             typename R = typename _mapcar_t<Cons<T, U>*, F>::type>
   R _mapcar(F fn, Cons<T, U> * lst){
     return cons(fn(car(lst)), _mapcar(fn, cdr(lst)));
   }
-  template <typename T, typename U, typename F>
+  template <typename F, typename T, typename ...S>
+  auto _mapcar(F fn, Cons<T, nil_t> * lst, S... rest){
+    return list(fn(car(lst), car(rest)...));
+  }
+  template <typename F, typename T, typename U, typename ...S>
+  auto _mapcar(F fn, Cons<T, U> * lst, S... rest){
+    return cons(fn(car(lst), car(rest)...), _mapcar(fn, cdr(lst), cdr(rest)...));
+  }
+  template <typename F, typename T, typename U>
   auto mapcar(F fn, Cons<T, U> * lst){
     if(listp(lst)){
       return _mapcar(fn, lst);
+    }
+    throw "MAPCAR only works on proper list.";
+  }
+  template <typename F, typename T, typename U, typename ...S>
+  auto mapcar(F fn, Cons<T, U> * lst, S... rest){
+    if(listp(lst)){
+      return _mapcar(fn, lst, rest...);
     }
     throw "MAPCAR only works on proper list.";
   }
