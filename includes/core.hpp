@@ -233,8 +233,7 @@ namespace licpp {
   }
 
 
-  template <typename T>
-  inline std::ostream & operator<<(std::ostream& os, nil_t) {
+  inline std::ostream & operator<<(std::ostream& os, Cons<nullptr_t, nullptr_t> *) {
     os << "nil";
     return os;
   }
@@ -247,10 +246,6 @@ namespace licpp {
   }
   template <typename T, typename U>
   inline std::ostream & operator<<(std::ostream& os, Cons<T, U> * c) {
-    if(nullp(c)){
-      os << "nil";
-      return os;
-    }
     os << "(";
     os << car(c);
     if(cdr(c)){
