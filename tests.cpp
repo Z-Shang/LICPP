@@ -30,9 +30,10 @@ int main(int, char**){
   cout << "List 6: " << list_6 << endl;
 
   int v1, v2, v3;
-  cout << multiple_value_bind(list_5, &v1, &v2, &v3)([=](){
-      cout << "v1: " << v1 << " v2: " << v2 << " v3: " << v3 << endl;
-      return cons_1;
+  string v4;
+  cout << multiple_value_bind(append(list_5, list((string)"foo")), &v1, &v2, &v3, &v4)([=](){
+      cout << "v1: " << v1 << " v2: " << v2 << " v3: " << v3 << " v4: " << v4 << endl;
+      return list(v4, v1, v2, v3);
     }) << endl;
 
   return 0;
