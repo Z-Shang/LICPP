@@ -9,16 +9,6 @@
 #endif
 #endif // _MSC_VER
 
-#ifdef __GNUG__
-#ifndef __clang__
-#define __USING_GCC__
-#if __cpp_concepts > 201507
-#define __HAS_CONCEPTS__
-#endif
-#endif
-#endif
-
-
 #ifndef __LICPP_CORE_HPP__
 #define __LICPP_CORE_HPP__
 
@@ -206,10 +196,6 @@ namespace licpp {
     static const int value = 1 + _list_len<U>::value;
   };
   template <typename T, typename U>
-  // This requires Concepts TS (Available in GCC >= 6.1 with flag `-fconcepts`)
-#ifdef __HAS_CONCEPTS__
-  requires _listp<Cons<T, U> *>::value
-#endif
   inline int length(Cons<T, U> * l){
     #ifndef __HAS_CONCEPTS__
     if(!(listp(l))){
