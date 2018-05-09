@@ -35,4 +35,4 @@ If you want some extra features, please use the latest version of GCC with the f
 All functions should be (preferably) implemented in the same way as its corresponding definition in [CLHS](http://www.lispworks.com/documentation/lw70/CLHS/Front/X_AllSym.htm).
 
 ## License
-GPLv3+
+MIT
