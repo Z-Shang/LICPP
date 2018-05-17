@@ -12,6 +12,8 @@
 
 A Lisp Flavoured C++
 
+An Visual Studio specified version is in the branch `ms`, licensed under MIT. 
+
 ## About
 A tiny library that implements some basic Lisp (mainly Common Lisp) utilities as a DSL, currently just a toy, beware of dirty hacks and low performance.
 
