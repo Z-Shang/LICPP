@@ -1,3 +1,9 @@
+/*
+ * This file is a part of the LICPP project,
+ * licensed under MIT liense.
+ * Please read LICENSE.TXT and README.MKD for more information.
+ */
+
 #ifndef __BASE_HACKS_HPP__
 #define __BASE_HACKS_HPP__
 
