@@ -22,6 +22,7 @@
 #include <functional>
 #include <string>
 #include <sstream>
+#include <type_traits>
 
 using std::nullptr_t;
 
@@ -54,7 +55,6 @@ namespace licpp {
 #define cddddr(X) cdr(cdr(cdr(cdr(X))))
 
 #define var auto
-
 	// A 2-Element Pair Structure That Holds Arbitary Types
 	template <typename T, typename U> class Cons;
 	using nil_t = Cons<nullptr_t, nullptr_t> *;
@@ -115,17 +115,14 @@ namespace licpp {
 		}
 
 	template <typename T>
-		struct _consp {
-			static const bool value = false;
-		};
+		struct _consp : std::false_type {};
 	template <typename T, typename U>
-		struct _consp<Cons<T, U> * > {
-			static const bool value = true;
-		};
+		struct _consp<Cons<T, U> * >: std::true_type {};
 	template <typename T>
 		inline bool consp(T) {
 			return _consp<T>::value;
 		}
+	template <typename T> constexpr bool consp_v = _consp<T>::value;
 
 	template <typename ... T>
 		struct _list_t {
@@ -167,21 +164,18 @@ namespace licpp {
 
 
 	template <typename T>
-		struct _listp {
-			static const bool value = false;
-		};
+		struct _listp : std::false_type {};
 	template <>
-		struct _listp<nil_t> {
-			static const bool value = true;
-		};
+		struct _listp<nil_t> : std::true_type  {};
 	template <typename T, typename U>
-		struct _listp<Cons<T, U> *> {
-			static const bool value = _listp<U>::value;
+		struct _listp<Cons<T, U> *> : _listp<U> {
+			//			static const bool value = _listp<U>::value;
 		};
 	template <typename T>
 		inline bool listp(T) {
 			return _listp<T>::value;
 		}
+	template <typename T> constexpr bool listp_v = _listp<T>::value;
 
 	template <typename T>
 		struct _list_len {
@@ -199,26 +193,60 @@ namespace licpp {
 		struct _list_len<Cons<T, U> * > {
 			static const int value = 1 + _list_len<U>::value;
 		};
-	template <typename T, typename U>
-		inline int length(Cons<T, U> * l) {
-			if (!(listp(l))) {
-				throw "LENGTH only works on proper list.";
-			}
+	//template <typename T, typename U>
+	//inline int length(Cons<T, U> * l) {
+	//if (!(listp(l))) {
+	//throw "LENGTH only works on proper list.";
+	//}
+	//return _list_len<Cons<T, U> * >::value;
+	//}
+	template <typename T, typename U, typename IsProperList = std::enable_if_t<listp_v<Cons<T, U>*>>>
+		constexpr int length(Cons<T, U> * l) {
 			return _list_len<Cons<T, U> * >::value;
 		}
 
-	template <typename T>
-		struct _nullp {
-			static const bool value = false;
+	template <std::size_t N, typename T>
+		struct _nth_t {};
+	template <typename T, typename U>
+		struct _nth_t <0, Cons<T, U> *> {
+			using type = T;
 		};
+	template <std::size_t N, typename T, typename U>
+		struct _nth_t <N, Cons<T, U> *> {
+			using type = typename _nth_t<N - 1, U>::type;
+		};
+	template <std::size_t N>
+		struct _nth;
 	template <>
-		struct _nullp<nil_t> {
-			static const bool value = true;
+		struct _nth<0>{
+			template <typename T, typename U>
+				T operator() (Cons<T, U>* lst) const {
+					return car(lst);
+				}
 		};
+	template <std::size_t N>
+		struct _nth{
+			template <typename T, typename U>
+				typename _nth_t<N, Cons<T, U>*>::type
+				operator() (Cons<T, U>* lst) const {
+					return _nth<N - 1>()(cdr(lst));
+				}
+		};
+	template <std::size_t N, typename T, typename U,
+			 typename WithInListRange = std::enable_if_t<(N < _list_len<Cons<T, U> *>::value) && listp_v<Cons<T, U> *>>>
+		auto nth(Cons<T, U> * lst) -> typename _nth_t<N, Cons<T, U> * >::type {
+			return _nth<N>()(lst);
+		}
+
+	template <typename T>
+		struct _nullp : std::false_type {};
+	template <>
+		struct _nullp<nil_t> : std::true_type {};
 	template <typename T>
 		inline bool nullp(T) {
 			return _nullp<T>::value;
 		}
+	template <typename T> constexpr bool nullp_v = _nullp<T>::value;
 
 
 	inline std::ostream & operator<<(std::ostream& os, Cons<nullptr_t, nullptr_t> *) {

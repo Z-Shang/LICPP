@@ -12,6 +12,7 @@
 #include <iostream>
 
 namespace licpp{
+  // APPEND
   template <typename T, typename U>
     struct _append_t{
       using type = nullptr_t;
@@ -49,14 +50,13 @@ namespace licpp{
              R _append(Cons<T, U> * a, Cons<S, Y> * b){
                return cons(car(a), _append(cdr(a), b));
              }
-  template <typename T, typename U, typename S, typename Y>
-    auto append(Cons<T, U> * a, Cons<S, Y> * b){
-      if(listp(a) && listp(b)){
-        return _append(a, b);
-      }
-      throw "APPEND only works on proper lists.";
-    }
+  template <typename T, typename U, typename S, typename Y,
+           typename BothProperLists = std::enable_if_t<listp_v<Cons<T, U>*> && listp_v<Cons<S, Y>*>>>
+             auto append(Cons<T, U> * a, Cons<S, Y> * b){
+               return _append(a, b);
+             }
 
+  // REVERSE
   template <typename T>
     struct _reverse_t {
       using type = nullptr_t;
@@ -84,14 +84,13 @@ namespace licpp{
     R _reverse(Cons<T, U> * lst){
       return append(_reverse(cdr(lst)), list(car(lst)));
     }
-  template <typename T, typename U>
-    auto reverse(Cons<T, U> * lst){
-      if(listp(lst)){
-        return _reverse(lst);
-      }
-      throw "APPEND only works on proper lists.";
-    }
+  template <typename T, typename U,
+           typename IsProperList = std::enable_if_t<listp_v<Cons<T, U>*>>>
+             auto reverse(Cons<T, U> * lst){
+               return _reverse(lst);
+             }
 
+  // MAPCAR
   template <typename T, typename U, typename ...Us>
     struct _mapcar_t {};
   template <typename F>
@@ -138,20 +137,17 @@ namespace licpp{
     auto _mapcar(F fn, Cons<T, U> * lst, S... rest){
       return cons(fn(car(lst), car(rest)...), _mapcar(fn, cdr(lst), cdr(rest)...));
     }
-  template <typename F, typename T, typename U>
-    auto mapcar(F fn, Cons<T, U> * lst){
-      if(listp(lst)){
-        return _mapcar(fn, lst);
-      }
-      throw "MAPCAR only works on proper list.";
-    }
-  template <typename F, typename T, typename U, typename ...S>
-    auto mapcar(F fn, Cons<T, U> * lst, S... rest){
-      if(listp(lst)){
-        return _mapcar(fn, lst, rest...);
-      }
-      throw "MAPCAR only works on proper list.";
-    }
+  template <typename F, typename T, typename U,
+           typename IsProperList = std::enable_if_t<listp_v<Cons<T, U>*>>>
+             auto mapcar(F fn, Cons<T, U> * lst){
+               return _mapcar(fn, lst);
+             }
+  template <typename F, typename T, typename U,
+           typename IsProperList = std::enable_if_t<listp_v<Cons<T, U>*>>, typename ...S>
+             auto mapcar(F fn, Cons<T, U> * lst, S... rest){
+               return _mapcar(fn, lst, rest...);
+             }
+
 };
 
 #endif

@@ -8,9 +8,11 @@
 #define __LICPP_HACKS__
 
 #include "core.hpp"
+#include "base_hacks.hpp"
 #include <type_traits>
 
 namespace licpp{
+  // MULTIPLE-VALUE-BIND
   template <typename T>
     struct _values_t {
       using type = nullptr_t;
@@ -68,14 +70,11 @@ namespace licpp{
         }
     };
 
-  template <typename T, typename U, typename ... Ss>
+  template <typename T, typename U, typename IsProperList = std::enable_if_t<listp_v<Cons<T, U>*>>, typename ... Ss>
     auto multiple_value_bind(Cons<T, U> * c, Ss ... sym){
       if(!std::is_same<typename _values_t<Cons<T, U> * >::type,
           typename _list_t<Ss ...>::type>::value){
         throw "The type of Pointer-List does not match the type of the given List";
-      }
-      if(!listp(c)){
-        throw "MULTIPLE-VALUE-BIND requires a proper list as its first argument.";
       }
       using sym_lst_t = typename _values_t<Cons<T, U> * >::type;
       sym_lst_t sym_lst = list(sym...);
@@ -91,6 +90,18 @@ namespace licpp{
         return ret;
       };
     }
+
+  // APPLY
+  template <typename T, typename U, typename F, std::size_t ... A>
+    auto _apply(F fn, Cons<T, U> * lst, std::index_sequence<A...>){
+      return fn(nth<A>(lst)...);
+    }
+  template <typename T, typename U, typename F,
+           typename ArgTypesMatch = std::enable_if_t<std::is_same_v<lambda_type<F>::arg_type, Cons<T, U> *>>>
+             auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
+                  return _apply(fn, lst, std::make_index_sequence<lambda_type<F>::arity>());
+             }
+
 };
 
 #endif
