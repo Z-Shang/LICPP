@@ -13,9 +13,9 @@
 #include "core.hpp"
 
 namespace licpp {
-	template <typename R, typename C, bool constp, typename ... As>
+	template <typename R, typename C, bool cp, typename ... As>
 		struct _lambda_type {
-			static const bool constp = constp;
+			static const bool constp = cp;
 			enum { arity = sizeof...(As) };
 			using return_type = R;
 			using arg_type = typename _list_t<As...>::type;

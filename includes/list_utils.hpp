@@ -12,6 +12,31 @@
 #include <iostream>
 
 namespace licpp{
+  // List-of
+  template <typename T, typename U>
+    struct _list_of : std::false_type {};
+  template <typename T>
+    struct _list_of<T, Cons<T, nil_t> * > : std::true_type {};
+  template <typename T, typename S>
+    struct _list_of<T, Cons<T, S> *> : _list_of<T, S> {};
+  template <typename T, typename U>
+    constexpr bool list_of_v = _list_of<T, U>::value;
+  // M-List-Of : Multiple-level list-of, e.g.: [[T], [[T]]] gives true
+  template <typename T, typename U>
+    struct _m_list_of : std::false_type {};
+  template <typename T>
+    struct _m_list_of<T, Cons<T, nil_t> * > : std::true_type {};
+  template <typename T, typename U>
+    struct _m_list_of<T, Cons<U, nil_t> * > : _m_list_of<T, U> {};
+  template <typename T, typename S>
+    struct _m_list_of<T, Cons<T, S> * > : _m_list_of<T, S> {};
+  template <typename T, typename U, typename S>
+    struct _m_list_of<T, Cons<U, S> * > {
+      static const bool value = _m_list_of<T, U>::value && _m_list_of<T, S>::value;
+    };
+  template <typename T, typename U>
+    constexpr bool m_list_of_v = _m_list_of<T, U>::value;
+
   // APPEND
   template <typename T, typename U>
     struct _append_t{
@@ -38,11 +63,11 @@ namespace licpp{
       using type = Cons<T, typename _append_t<U, Cons<S, Y> * >::type> *;
     };
   template <typename S, typename Y>
-    Cons<S, Y> * _append(nil_t, Cons<S, Y> * b){
+    inline Cons<S, Y> * _append(nil_t, Cons<S, Y> * b){
       return b;
     }
   template <typename T, typename U>
-    Cons<T, U> * _append(Cons<T, U> * a, nil_t){
+    inline Cons<T, U> * _append(Cons<T, U> * a, nil_t){
       return a;
     }
   template <typename T, typename U, typename S, typename Y,
@@ -77,7 +102,7 @@ namespace licpp{
     struct _reverse_t <Cons<T, U> *>{
       using type = typename _append_t<typename _reverse_t<U>::type, Cons<T, nil_t> * >::type;
     };
-  nil_t _reverse(nil_t){
+  inline nil_t _reverse(nil_t){
     return nil;
   }
   template <typename T, typename U, typename R = typename _reverse_t<Cons<T, U> *>::type>
@@ -147,7 +172,6 @@ namespace licpp{
              auto mapcar(F fn, Cons<T, U> * lst, S... rest){
                return _mapcar(fn, lst, rest...);
              }
-
 };
 
 #endif

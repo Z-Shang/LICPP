@@ -101,7 +101,6 @@ namespace licpp{
              auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
                   return _apply(fn, lst, std::make_index_sequence<lambda_type<F>::arity>());
              }
-
 };
 
 #endif
