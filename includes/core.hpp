@@ -161,6 +161,10 @@ namespace licpp {
     struct _cdr_t<Cons<T, U> * > {
       using type = U;
     };
+  template <typename T>
+    using car_t = typename _car_t<T>::type;
+  template <typename T>
+    using cdr_t = typename _cdr_t<T>::type;
 
 
   template <typename T>

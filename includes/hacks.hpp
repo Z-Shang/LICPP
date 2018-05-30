@@ -99,7 +99,7 @@ namespace licpp{
   template <typename T, typename U, typename F,
            typename ArgTypesMatch = std::enable_if_t<std::is_same_v<lambda_type<F>::arg_type, Cons<T, U> *>>>
              auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
-                  return _apply(fn, lst, std::make_index_sequence<lambda_type<F>::arity>());
+               return _apply(fn, lst, std::make_index_sequence<lambda_type<F>::arity>());
              }
 };
 

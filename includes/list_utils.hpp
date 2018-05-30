@@ -172,6 +172,25 @@ namespace licpp{
              auto mapcar(F fn, Cons<T, U> * lst, S... rest){
                return _mapcar(fn, lst, rest...);
              }
+  // FOLDL
+  template <typename F, typename T>
+    inline auto foldl(F fn, T acc, Cons<T, nil_t> * lst){
+      return fn(acc, car(lst));
+    }
+  template <typename F, typename T, typename U, typename = std::enable_if_t<list_of_v<T, U>>>
+    auto foldl(F fn, T acc, Cons<T, U> * lst) {
+      return foldl(fn, fn(acc, car(lst)), cdr(lst));
+    }
+  // FOLDR
+  template <typename F, typename T>
+    inline auto foldr(F fn, T acc, Cons<T, nil_t> * lst){
+      return fn(acc, car(lst));
+    }
+  template <typename F, typename T, typename U, typename = std::enable_if_t<list_of_v<T, U>>>
+    auto foldr(F fn, T acc, Cons<T, U> * lst) {
+      return fn(car(lst), foldr(fn, acc, cdr(lst)));
+    }
+
 };
 
 #endif

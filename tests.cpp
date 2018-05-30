@@ -48,6 +48,15 @@ int main(int, char**){
       return l::list(v4, v1, v2, v3);
     }) << endl;
 
+  var list_7 = l::list(1, 2, 3, 4, 5);
+
+  auto add2 = [](auto a, auto b){ return a + b; };
+  auto sub2 = [](auto a, auto b){ return a - b; };
+
+  cout << l::foldl(add2, 0, list_7) << endl;
+  cout << l::foldr(add2, 0, list_7) << endl;
+  cout << l::foldl(sub2, 0, list_7) << endl;
+  cout << l::foldr(sub2, 0, list_7) << endl;
 
   return 0;
 }
