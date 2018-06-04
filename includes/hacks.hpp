@@ -1,3 +1,9 @@
+/*
+ * This file is a part of the LICPP project,
+ * licensed under AGPL liense, version 3 or above.
+ * Please read LICENSE and README.MKD for more information.
+ */
+
 #ifndef __LICPP_HACKS__
 #define __LICPP_HACKS__
 
