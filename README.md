@@ -2,7 +2,7 @@
 
 # LICPP
 
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+[![AGPLv3 license](https://img.shields.io/badge/License-AGPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 [![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
 [![Made with Secret Alien Technology](https://img.shields.io/badge/Made%20with-Secret%20Alien%20Technology-green.svg?longCache=true&style=for-the-badge&colorB=82ce82)](https://common-lisp.net/)
@@ -37,4 +37,4 @@ If you want some extra features, please use the latest version of GCC with the f
 All functions should be (preferably) implemented in the same way as its corresponding definition in [CLHS](http://www.lispworks.com/documentation/lw70/CLHS/Front/X_AllSym.htm).
 
 ## License
-GPLv3+
+AGPLv3+
