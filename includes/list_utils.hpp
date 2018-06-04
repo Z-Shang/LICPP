@@ -1,3 +1,9 @@
+/*
+ * This file is a part of the LICPP project,
+ * licensed under AGPL, version 3 or above.
+ * Please read LICENSE and README.MKD for more information.
+ */
+
 #ifndef __LICPP_LIST_UTILS__
 #define __LICPP_LIST_UTILS__
 
