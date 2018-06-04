@@ -1,6 +1,6 @@
 /*
  * This file is a part of the LICPP project,
- * licensed under GPLv3.
+ * licensed under AGPL, version 3 or above.
  * Please read LICENSE and README.MKD for more information.
  */
 
