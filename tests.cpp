@@ -29,6 +29,9 @@ int main(int, char**){
   cout << "List 5: " << list_5 << endl;
   cout << "List 6: " << list_6 << endl;
 
+  auto [a, b, c, d] = list_2;
+  cout << "a: " << a << " b: " << b << " c: " << c << " d: " << d << endl;
+
   int v1, v2, v3;
   string v4;
   cout << multiple_value_bind(append(list_5, list((string)"foo")), &v1, &v2, &v3, &v4)([=](){

@@ -4,14 +4,14 @@
  * Please read LICENSE and README.MKD for more information.
  */
 
-//#pragma once
+#pragma once
 #ifdef _MSC_VER
-#if _MSC_VER < 1900
-#error At least Visual Studio 2015 is required
+#if _MSC_VER < 1912
+#error At least MSVC 15.5 is required
 #endif
 #else
-#if __cplusplus <= 201103L
-#error At least C++ 14 is required
+#if __cplusplus < 201703L
+#error At least C++ 17 is required
 #endif
 #endif // _MSC_VER
 
@@ -19,6 +19,7 @@
 #ifndef __clang__
 #define __USING_GCC__
 #if __cpp_concepts > 201507
+#pragma message "Using Concepts"
 #define __HAS_CONCEPTS__
 #endif
 #endif
@@ -34,6 +35,10 @@
 #include <string>
 #include <sstream>
 #include <type_traits>
+
+#ifdef __USING_GCC__
+
+#endif
 
 using std::nullptr_t;
 
@@ -177,7 +182,7 @@ namespace licpp {
   template <typename T>
     struct _listp : std::false_type {};
   template <>
-    struct _listp<nil_t> std::true_type {};
+    struct _listp<nil_t> : std::true_type {};
   template <typename T, typename U>
     struct _listp<Cons<T, U> *> : _listp<U> {
       //static const bool value = _listp<U>::value;
@@ -204,6 +209,7 @@ namespace licpp {
     struct _list_len<Cons<T, U> * >{
       static const int value = 1 + _list_len<U>::value;
     };
+
 #ifdef __HAS_CONCEPTS__
   template <typename T, typename U>
     // This requires Concepts TS (Available in GCC >= 6.1 with flag `-fconcepts`)
@@ -393,6 +399,23 @@ namespace licpp {
     inline List<T> *
     tlist(T head, Ts... rest) {
       return lcons(head, list(rest...));
+    }
+};
+
+// C++ 17 Extensions
+namespace std {
+  // Support of Structed Binding
+  template<typename T, typename U>
+    struct tuple_size<licpp::Cons<T, U> *> : licpp::_list_len<licpp::Cons<T, U> *> {};
+
+  template<std::size_t N, typename T, typename U>
+    struct tuple_element<N, licpp::Cons<T, U> * > : licpp::_nth_t<N, licpp::Cons<T, U> * > {};
+};
+
+namespace licpp{
+  template<std::size_t N, typename T, typename U>
+    typename licpp::_nth_t<N, licpp::Cons<T, U> * >::type get(licpp::Cons<T, U> * c) {
+      return licpp::_nth<N>()(c);
     }
 };
 
