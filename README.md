@@ -12,15 +12,16 @@
 
 A Lisp Flavoured C++
 
+This is a specified version for C++ 17, **ONLY** tested with GCC 8.
+
 An Visual Studio specified version is in the branch `ms`, licensed under MIT. 
+
 
 ## About
 A tiny library that implements some basic Lisp (mainly Common Lisp) utilities as a DSL, currently just a toy, beware of dirty hacks and low performance.
 
-This has been tested with Clang 9.0, GCC 7.1, and Visual Studio Community 2017.
-
 ## Usage
-At least C++ 14 is required.
+At least C++ 17 is required.
 
 You may expect everything to work similarly to what you know in Common Lisp (although there will be limitation because of the differences between C++ and Lisp).
 
