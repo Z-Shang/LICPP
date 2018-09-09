@@ -12,7 +12,7 @@
 #include <type_traits>
 
 namespace licpp{
-  // MULTIPLE-VALUE-BIND
+  // [[Deprecated]] MULTIPLE-VALUE-BIND
   template <typename T>
     struct _values_t {
       using type = nullptr_t;
@@ -70,34 +70,45 @@ namespace licpp{
         }
     };
 
+  namespace legacy{
 #ifdef __HAS_CONCEPTS__
-  template <typename T, typename U, typename ... Ss>
-    // This requires Concepts TS (Available in GCC >= 6.1 with flag `-fconcepts`)
-    requires std::is_same<typename _values_t<Cons<T, U> * >::type,
-             typename _list_t<Ss ...>::type>::value &&
-               _listp<Cons<T, U> * >::value
+    template <typename T, typename U, typename ... Ss>
+      // This requires Concepts TS (Available in GCC >= 6.1 with flag `-fconcepts`)
+      requires std::is_same<typename _values_t<Cons<T, U> * >::type,
+               typename _list_t<Ss ...>::type>::value &&
+                 _listp<Cons<T, U> * >::value
 #else
-               template <typename T, typename U, typename IsProperList = std::enable_if_t<listp_v<Cons<T, U>*>>, typename ... Ss>
+                 template <typename T, typename U, typename IsProperList = std::enable_if_t<listp_v<Cons<T, U>*>>, typename ... Ss>
 #endif
-               auto multiple_value_bind(Cons<T, U> * c, Ss ... sym){
-                 if(!std::is_same<typename _values_t<Cons<T, U> * >::type,
-                     typename _list_t<Ss ...>::type>::value){
-                   throw "The type of Pointer-List does not match the type of the given List";
-                 }
-                 using sym_lst_t = typename _values_t<Cons<T, U> * >::type;
-                 sym_lst_t sym_lst = list(sym...);
-                 auto orig = mapcar([](auto p){ return *p; }, sym_lst);
-                 _mvb(c, sym_lst);
-                 return [orig, sym_lst](auto fn){
-                   auto retval = get_return<decltype(fn)>()(fn);
-                   _mvb(orig, sym_lst);
-                   if(car(retval)){
-                     return cdr(retval);
+                 [[deprecated("Please use block scope and structed binding in C++17")]]
+                 auto multiple_value_bind(Cons<T, U> * c, Ss ... sym){
+                   if(!std::is_same<typename _values_t<Cons<T, U> * >::type,
+                       typename _list_t<Ss ...>::type>::value){
+                     throw "The type of Pointer-List does not match the type of the given List";
                    }
-                   typename _cdr_t<decltype(retval)>::type ret = 0;
-                   return ret;
-                 };
-               }
+                   using sym_lst_t = typename _values_t<Cons<T, U> * >::type;
+                   sym_lst_t sym_lst = list(sym...);
+                   auto orig = mapcar([](auto p){ return *p; }, sym_lst);
+                   _mvb(c, sym_lst);
+                   return [orig, sym_lst](auto fn){
+                     auto retval = get_return<decltype(fn)>()(fn);
+                     _mvb(orig, sym_lst);
+                     if(car(retval)){
+                       return cdr(retval);
+                     }
+                     typename _cdr_t<decltype(retval)>::type ret = 0;
+                     return ret;
+                   };
+                 }
+  }; // Namespace Legacy
+
+#define __expand_var(...) [__VA_ARGS__]
+#define __expand_cap(...) __VA_ARGS__
+
+#define multiple_value_bind(var, fn, ...) ([&, __expand_cap var]{ \
+  auto __expand_var var = fn; \
+  __VA_ARGS__ \
+})()\
 
   // APPLY
   template <typename T, typename U, typename F, std::size_t ... A>
@@ -106,14 +117,14 @@ namespace licpp{
     }
 #ifdef __HAS_CONCEPTS__
   template <typename T, typename U, typename F>
-  requires std::is_same_v<lambda_type<F>::arg_type, Cons<T, U> *>
+    requires std::is_same_v<lambda_type<F>::arg_type, Cons<T, U> *>
 #else
-  template <typename T, typename U, typename F,
-           typename ArgTypesMatch = std::enable_if_t<std::is_same_v<lambda_type<F>::arg_type, Cons<T, U> *>>>
+    template <typename T, typename U, typename F,
+             typename ArgTypesMatch = std::enable_if_t<std::is_same_v<lambda_type<F>::arg_type, Cons<T, U> *>>>
 #endif
-             auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
-               return _apply(fn, lst, std::make_index_sequence<lambda_type<F>::arity>());
-             }
+               auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
+                 return _apply(fn, lst, std::make_index_sequence<lambda_type<F>::arity>());
+               }
 };
 
 #endif

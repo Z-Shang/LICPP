@@ -32,12 +32,21 @@ int main(int, char**){
   auto [a, b, c, d] = list_2;
   cout << "a: " << a << " b: " << b << " c: " << c << " d: " << d << endl;
 
-  int v1, v2, v3;
-  string v4;
-  cout << multiple_value_bind(append(list_5, list((string)"foo")), &v1, &v2, &v3, &v4)([=](){
-      cout << "v1: " << v1 << " v2: " << v2 << " v3: " << v3 << " v4: " << v4 << endl;
-      return list(v4, v1, v2, v3);
-    }) << endl;
+  //int v1, v2, v3;
+  //string v4;
+  //cout << multiple_value_bind(append(list_5, list((string)"foo")), &v1, &v2, &v3, &v4)([=](){
+  //cout << "v1: " << v1 << " v2: " << v2 << " v3: " << v3 << " v4: " << v4 << endl;
+  //return list(v4, v1, v2, v3);
+  //}) << endl;
 
-  return 0;
+   auto r = multiple_value_bind((a, b, c, d), append(list_5, list((string)"foo")),
+      cout << "a: " << a << " b: " << b << " c: " << c << " d: " << d << endl;
+      auto res = list(a, b, c, d);
+      return res;
+      );
+
+   cout << r << endl;
+  
+
+    return 0;
 }
