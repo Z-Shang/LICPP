@@ -26,6 +26,9 @@ namespace licpp {
     struct lambda_type<R(C::*)(As...)> : _lambda_type<R, C, false, As...> {};
   template <typename R, typename C, typename ... As>
     struct lambda_type<R(C::*)(As...) const> : _lambda_type<R, C, true, As...> {};
+
+#define fwd(...) std::forward<decltype(__VA_ARGS__)>(__VA_ARGS__)
+
 };
 
 #endif

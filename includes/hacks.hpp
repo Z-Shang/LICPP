@@ -113,18 +113,18 @@ namespace licpp{
   // APPLY
   template <typename T, typename U, typename F, std::size_t ... A>
     auto _apply(F fn, Cons<T, U> * lst, std::index_sequence<A...>){
-      return fn(nth<A>(lst)...);
+      return fn(std::forward<typename _nth_t<A, Cons<T, U>*>::type>(nth<A>(lst))...);
     }
 #ifdef __HAS_CONCEPTS__
   template <typename T, typename U, typename F>
-    requires std::is_same_v<lambda_type<F>::arg_type, Cons<T, U> *>
+    requires std::is_same_v<typename lambda_type<F>::arg_type, Cons<T, U> *>
 #else
-    template <typename T, typename U, typename F,
-             typename ArgTypesMatch = std::enable_if_t<std::is_same_v<lambda_type<F>::arg_type, Cons<T, U> *>>>
+  template <typename T, typename U, typename F,
+            typename ArgTypesMatch = std::enable_if_t<std::is_same_v<typename lambda_type<F>::arg_type, Cons<T, U> *>>>
 #endif
-               auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
-                 return _apply(fn, lst, std::make_index_sequence<lambda_type<F>::arity>());
-               }
+    auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
+      return _apply(std::forward<F>(fn), lst, std::make_index_sequence<lambda_type<F>::arity>());
+    }
 };
 
 #endif
