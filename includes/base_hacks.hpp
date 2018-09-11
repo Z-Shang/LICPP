@@ -29,6 +29,18 @@ namespace licpp {
 
 #define fwd(...) std::forward<decltype(__VA_ARGS__)>(__VA_ARGS__)
 
+  template <typename ... Ts>
+    auto _fwd_cap(Ts&& ... xs){
+      return list(fwd(xs)...);
+    }
+
+#define fwd_cap(...) _fwd_cap(fwd(__VA_ARGS__))
+
+  template <typename ... Ts>
+    auto fwd_cap_as_list(Ts&& ... xs){
+      return list(fwd_cap(xs)...);
+    }
+
 };
 
 #endif

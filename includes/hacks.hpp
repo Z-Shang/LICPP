@@ -106,9 +106,9 @@ namespace licpp{
 #define __expand_cap(...) __VA_ARGS__
 
 #define multiple_value_bind(var, fn, ...) ([&, __expand_cap var]{ \
-  auto __expand_var var = fn; \
-  __VA_ARGS__ \
-})()\
+    auto __expand_var var = fn; \
+    __VA_ARGS__ \
+    })()\
 
   // APPLY
   template <typename T, typename U, typename F, std::size_t ... A>
@@ -119,12 +119,24 @@ namespace licpp{
   template <typename T, typename U, typename F>
     requires std::is_same_v<typename lambda_type<F>::arg_type, Cons<T, U> *>
 #else
-  template <typename T, typename U, typename F,
-            typename ArgTypesMatch = std::enable_if_t<std::is_same_v<typename lambda_type<F>::arg_type, Cons<T, U> *>>>
+    template <typename T, typename U, typename F,
+             typename ArgTypesMatch = std::enable_if_t<std::is_same_v<typename lambda_type<F>::arg_type, Cons<T, U> *>>>
 #endif
-    auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
-      return _apply(std::forward<F>(fn), lst, std::make_index_sequence<lambda_type<F>::arity>());
-    }
+               auto apply(F fn, Cons<T, U> * lst) -> typename lambda_type<F>::return_type {
+                 return _apply(std::forward<F>(fn), lst, std::make_index_sequence<lambda_type<F>::arity>());
+               }
+
+  template <typename F, typename T>
+    struct _applicable : std::false_type {
+    };
+  template <typename F, typename T, typename U>
+    struct _applicable<F, Cons<T, U>*> {
+      static constexpr bool value = std::is_same_v<typename lambda_type<F>::arg_type, Cons<T, U>*>;
+    };
+  template <typename F, typename T = nil_t>
+    inline constexpr bool applicable_v = _applicable<F, T>::value;
+
+
 };
 
 #endif

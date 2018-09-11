@@ -106,6 +106,9 @@ namespace licpp {
       return new Cons<T, U>(car, cdr);
     }
 
+    inline auto list() {
+      return nil;
+    }
   template <typename T>
     inline auto list(T car) {
       return cons(car, nil);
@@ -145,6 +148,10 @@ namespace licpp {
       using type = nullptr_t;
     };
   template <>
+    struct _list_t<>{
+      using type = nil_t;
+    };
+  template <>
     struct _list_t<nullptr_t>{
       using type = nil_t;
     };
@@ -178,7 +185,6 @@ namespace licpp {
       using type = U;
     };
 
-
   template <typename T>
     struct _listp : std::false_type {};
   template <>
@@ -195,19 +201,19 @@ namespace licpp {
 
   template <typename T>
     struct _list_len{
-      static const int value = 0;
+      static const std::size_t value = 0;
     };
   template <>
     struct _list_len<nil_t>{
-      static const int value = 0;
+      static const std::size_t value = 0;
     };
   template <typename T>
     struct _list_len<Cons<T, nil_t> * >{
-      static const int value = 1;
+      static const std::size_t value = 1;
     };
   template <typename T, typename U>
     struct _list_len<Cons<T, U> * >{
-      static const int value = 1 + _list_len<U>::value;
+      static const std::size_t value = 1 + _list_len<U>::value;
     };
 
 #ifdef __HAS_CONCEPTS__
@@ -217,7 +223,7 @@ namespace licpp {
 #else
     template <typename T, typename U, typename IsProperList = std::enable_if_t<listp_v<Cons<T, U>*>>>
 #endif
-    inline constexpr int length(Cons<T, U> * l){
+    inline constexpr std::size_t length(Cons<T, U> * l){
       return _list_len<Cons<T, U> * >::value;
     }
 
@@ -259,6 +265,54 @@ namespace licpp {
                  return _nth<N>()(lst);
                }
 
+  template <std::size_t Start, typename T, std::size_t Len>
+    struct _subseq_t {};
+  template <typename T, typename U>
+    struct _subseq_t <0, Cons<T, U>*, 0>{
+      using type = nil_t;
+    };
+  template <typename T, typename U, std::size_t Len>
+    struct _subseq_t <0, Cons<T, U>*, Len>{
+      using type = Cons<T, typename _subseq_t<0, U, Len - 1>::type> * ;
+    };
+  template <std::size_t Start, typename T, typename U, std::size_t Len>
+    struct _subseq_t <Start, Cons<T, U>*, Len>{
+      using type = typename _subseq_t<Start - 1, U, Len>::type;
+    };
+  template <std::size_t Start, std::size_t Len>
+    struct _subseq;
+  template <>
+    struct _subseq<0, 0> {
+      template <typename T, typename U>
+        nil_t operator() (Cons<T, U>*) const {
+          return nil;
+        }
+    };
+  template <std::size_t Len>
+    struct _subseq<0, Len> {
+      template <typename T, typename U>
+        typename _subseq_t<0, Cons<T, U> *, Len>::type
+        operator() (Cons<T, U> * lst) const {
+          return cons(car(lst), _subseq<0, Len - 1>()(cdr(lst)));
+        }
+    };
+  template <std::size_t Start, std::size_t Len>
+    struct _subseq {
+      template <typename T, typename U>
+        typename _subseq_t<Start, Cons<T, U> *, Len>::type
+        operator() (Cons<T, U> * lst) const {
+          return _subseq<Start - 1, Len>()(cdr(lst));
+        }
+    };
+  template <std::size_t Start, typename T, typename U>
+    inline auto subseq(Cons<T, U>* lst) -> typename _subseq_t<Start, Cons<T, U>*, _list_len<Cons<T, U>*>::value - Start>::type {
+      return _subseq<Start, _list_len<Cons<T, U>*>::value - Start>()(lst);
+    }
+  template <std::size_t Start, std::size_t End, typename T, typename U>
+    inline auto subseq(Cons<T, U>* lst) -> typename _subseq_t<Start, Cons<T, U>*, End - Start>::type {
+      return _subseq<Start, End - Start>()(lst);
+    }
+
   template <typename T>
     struct _nullp : std::false_type {};
   template <>
@@ -268,7 +322,6 @@ namespace licpp {
       return _nullp<T>::value;
     }
   template <typename T> constexpr bool nullp_v = _nullp<T>::value;
-
 
   inline std::ostream & operator<<(std::ostream& os, Cons<nullptr_t, nullptr_t> *) {
     os << "nil";
@@ -324,6 +377,8 @@ namespace licpp {
         List<T> * _tail;
 
       public:
+        using content_type = T;
+
         T head() const { return _head; }
         List<T> * tail() const { return _tail; }
         List() :
@@ -398,7 +453,29 @@ namespace licpp {
   template <typename T, typename ...Ts>
     inline List<T> *
     tlist(T head, Ts... rest) {
-      return lcons(head, list(rest...));
+      return lcons(head, tlist(rest...));
+    }
+
+  template <typename T>
+    inline size_t
+    tlen(List<T> * lst){
+      if(!lst){
+        return 0;
+      }else{
+        return 1 + tlen(cdr(lst));
+      }
+    }
+  template <typename T>
+    inline T 
+    nth(List<T> * lst, size_t n){
+      if(!lst){
+        return nullptr;
+      }
+      if(n == 0){
+        return lst->head;
+      }else{
+        return nth(lst->tail, n - 1);
+      }
     }
 };
 
